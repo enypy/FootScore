@@ -1,34 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect, useRef } from 'react'
+import Header from './components/Header'
+import MatchFilterRow from './components/MatchFilterRow'
+import MatchTable from './components/MatchTable'
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const startupAbortController = useRef(new AbortController)
+
+  const [to, setTo] = useState(new Date().toISOString().split('T', 1)[0])
+  const [from, setFrom] = useState(new Date().toISOString().split('T', 1)[0])
+  const [countryId, setCountryId] = useState('')
+  const [teamId, setTeamId] = useState('')
+  const timezone = 'Europe/Paris'
+  const [matchList, setMatchList] = useState([])
+
+useEffect(() => {
+
+  fetch(
+    `https://apiv2.allsportsapi.com/football/?met=Fixtures&APIkey=20c459ad48869f7cdc379dcaeb20c8ddea52b7b8f536508b480a91675c612eee&from=${from}&to=${to}&timezone=${timezone}&countryId=${countryId}&teamId=${teamId}`, {
+      signal: startupAbortController.current.signal,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(function(response) {
+      setMatchList(response.result)
+    })
+  return () => {
+    startupAbortController.current.abort()
+    startupAbortController.current = new AbortController
+  }
+}, [to, from, countryId, teamId])
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+<>
+<Header />
+<MatchFilterRow valueFrom={from} valueTo={to} onChangeFrom={setFrom} onChangeTo={setTo}/>
+<MatchTable matchList={matchList}/>
+</>
   )
 }
 
