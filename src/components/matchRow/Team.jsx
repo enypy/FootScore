@@ -4,9 +4,9 @@ export default function Team({ teamName, teamLogo }) {
 
     return (
         <>
-            <div>
+            <div className='d-flex flex-column justify-coontent-center align-items-center my-2 col-4'>
                 <h4>{teamName}</h4>
-                <img src={teamLogo ? teamLogo : defaultLogo} alt={teamName} onError={(event) => {
+                <img className="img-fluid" src={teamLogo ? teamLogo : defaultLogo} alt={teamName} onError={(event) => {
                     event.target.src = defaultLogo
                     event.onError = null
                 }} />
